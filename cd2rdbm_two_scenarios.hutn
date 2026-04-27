@@ -1,0 +1,110 @@
+mm_Class:EN { hasName "Class",            hasPotency 2 }
+mm_Assoc:EN { hasName "Association",      hasPotency 2 }
+mm_Attr:EN  { hasName "Attribute",        hasPotency 2,
+              is_primary:AT { hasDataType BOOLEAN },
+              name      :AT { hasDataType STRING  } }
+mm_PDT:EN   { hasName "PrimitiveDataType", hasPotency 2 }
+mm_Table:EN { hasName "Table",             hasPotency 2 }
+mm_FKey:EN  { hasName "FKey",              hasPotency 2 }
+mm_Col:EN   { hasName "Column",            hasPotency 2,
+              type:AT { hasDataType STRING },
+              name:AT { hasDataType STRING } }
+
+mm_CTR:EN { hasName "ClassTableRel", hasPotency 2,
+  ct_class:PA { hasName "ct_class", isConnectedTo mm_Class },
+  ct_table:PA { hasName "ct_table", isConnectedTo mm_Table } }
+mm_AFR:EN { hasName "AssocFKeyRel",  hasPotency 2,
+  af_assoc:PA { hasName "af_assoc", isConnectedTo mm_Assoc },
+  af_fkey :PA { hasName "af_fkey",  isConnectedTo mm_FKey  } }
+mm_ACR:EN { hasName "AttrColRel",    hasPotency 2,
+  ac_attr :PA { hasName "ac_attr",  isConnectedTo mm_Attr },
+  ac_col  :PA { hasName "ac_col",   isConnectedTo mm_Col  } }
+
+
+s1_Company :EN { hasName "Company",  hasDeclaredType mm_Class, hasPotency 1 }
+s1_Person  :EN { hasName "Person",   hasDeclaredType mm_Class, hasPotency 1 }
+s1_Customer:EN { hasName "Customer", hasDeclaredType mm_Class, hasPotency 1,
+                 parent:PA { isConnectedTo s1_Person } }
+s1_employee:EN { hasName "employee", hasDeclaredType mm_Assoc, hasPotency 1,
+                 src:PA  { isConnectedTo s1_Company },
+                 dest:PA { isConnectedTo s1_Person  } }
+s1_int     :EN { hasName "int",      hasDeclaredType mm_PDT,   hasPotency 1 }
+s1_custid  :EN { hasName "cust_id",  hasDeclaredType mm_Attr,  hasPotency 1,
+                 is_primary:AT { hasValue true },
+                 name      :AT { hasValue "cust_id" },
+                 attrs:PA { isConnectedTo s1_Customer },
+                 type :PA { isConnectedTo s1_int      } }
+
+t1_CoT  :EN { hasName "CompanyT",  hasDeclaredType mm_Table, hasPotency 1 }
+t1_PeT  :EN { hasName "PersonT",   hasDeclaredType mm_Table, hasPotency 1 }
+t1_CuT  :EN { hasName "CustomerT", hasDeclaredType mm_Table, hasPotency 1 }
+t1_empFK:EN { hasName "empFK",     hasDeclaredType mm_FKey,  hasPotency 1,
+              fkeys:PA { isConnectedTo t1_CoT },
+              refs :PA { isConnectedTo t1_PeT } }
+t1_ciCol:EN { hasName "ciCol",     hasDeclaredType mm_Col,   hasPotency 1,
+              type:AT { hasValue "int" },
+              name:AT { hasValue "cust_id" },
+              cols:PA { isConnectedTo t1_CuT },
+              pkey:PA { isConnectedTo t1_CuT } }
+
+ctr_Company :EN { hasName "ctr_Company",  hasDeclaredType mm_CTR, hasPotency 1,
+  ct_class:PA { isConnectedTo s1_Company }, ct_table:PA { isConnectedTo t1_CoT } }
+ctr_Person  :EN { hasName "ctr_Person",   hasDeclaredType mm_CTR, hasPotency 1,
+  ct_class:PA { isConnectedTo s1_Person  }, ct_table:PA { isConnectedTo t1_PeT } }
+ctr_Customer:EN { hasName "ctr_Customer", hasDeclaredType mm_CTR, hasPotency 1,
+  ct_class:PA { isConnectedTo s1_Customer}, ct_table:PA { isConnectedTo t1_CuT } }
+afr_emp     :EN { hasName "afr_emp",      hasDeclaredType mm_AFR, hasPotency 1,
+  af_assoc:PA { isConnectedTo s1_employee }, af_fkey:PA { isConnectedTo t1_empFK } }
+acr_custid  :EN { hasName "acr_custid",   hasDeclaredType mm_ACR, hasPotency 1,
+  ac_attr:PA  { isConnectedTo s1_custid   }, ac_col :PA { isConnectedTo t1_ciCol } }
+
+
+s2_acme  :EN { hasName "acme",  hasDeclaredType s1_Company,  hasPotency 0 }
+s2_alice :EN { hasName "alice", hasDeclaredType s1_Person,   hasPotency 0 }
+s2_bob   :EN { hasName "bob",   hasDeclaredType s1_Customer, hasPotency 0,
+               cust_id:AT { hasValue 42 } }
+s2_emp1  :EN { hasName "emp1",  hasDeclaredType s1_employee, hasPotency 0,
+               src:PA  { isConnectedTo s2_acme },
+               dest:PA { isConnectedTo s2_bob  } }
+
+t2_acmeRow :EN { hasName "acmeRow",  hasDeclaredType t1_CoT, hasPotency 0,
+                 objectId:AT { hasValue 1 } }
+t2_aliceRow:EN { hasName "aliceRow", hasDeclaredType t1_PeT, hasPotency 0,
+                 objectId:AT { hasValue 10 } }
+t2_bobRow  :EN { hasName "bobRow",   hasDeclaredType t1_CuT, hasPotency 0,
+                 objectId:AT { hasValue 20 },
+                 cust_id :AT { hasValue 42 } }
+t2_empFK1  :EN { hasName "empFK1",   hasDeclaredType t1_empFK, hasPotency 0,
+                 fkeys:PA { isConnectedTo t2_acmeRow },
+                 refs :PA { isConnectedTo t2_bobRow  } }
+
+dctr_acme :EN { hasName "dctr_acme",  hasDeclaredType ctr_Company,  hasPotency 0,
+  ct_class:PA { isConnectedTo s2_acme  }, ct_table:PA { isConnectedTo t2_acmeRow  } }
+dctr_alice:EN { hasName "dctr_alice", hasDeclaredType ctr_Person,   hasPotency 0,
+  ct_class:PA { isConnectedTo s2_alice }, ct_table:PA { isConnectedTo t2_aliceRow } }
+dctr_bob  :EN { hasName "dctr_bob",   hasDeclaredType ctr_Customer, hasPotency 0,
+  ct_class:PA { isConnectedTo s2_bob   }, ct_table:PA { isConnectedTo t2_bobRow   } }
+dafr_emp1 :EN { hasName "dafr_emp1",  hasDeclaredType afr_emp,      hasPotency 0,
+  af_assoc:PA { isConnectedTo s2_emp1  }, af_fkey :PA { isConnectedTo t2_empFK1   } }
+dacr_custid:EN { hasName "dacr_custid", hasDeclaredType acr_custid, hasPotency 0,
+  ac_attr :PA { isConnectedTo s2_bob   }, ac_col  :PA { isConnectedTo t2_bobRow   } }
+
+
+R_create_attr:OP {
+  B1:AO { hasPredicate "class(c) & active(c)" },
+  B2:AO { hasPredicate "ct_class(ct,c) & ct_table(ct,t)", follows B1 },
+  B3:AO { hasPredicate "primitiveType(p) & value(p.name)=tn",  follows B2 },
+  B4:AO { hasPredicate "not exists a : owns(c,a) & value(a.name)=an", follows B3 },
+  H1:AO { hasPredicate "emit Create(a:Attribute, name=an, is_primary=false, owner=c, type=p)" },
+  H2:AO { hasPredicate "emit Create(col:Column, name=an, type=tn, owner=t)", follows H1 },
+  H3:AO { hasPredicate "emit Create(acr:AttrColRel, ac_attr=a, ac_col=col)", follows H2 },
+  hasBody B1, hasHead H1
+}
+
+R_replace_name:OP {
+  B1:AO { hasPredicate "ac_attr(rel,a) & ac_col(rel,col)" },
+  B2:AO { hasPredicate "value(a.name)=n & value(col.name)=m", follows B1 },
+  B3:AO { hasPredicate "n != m", follows B2 },
+  H1:AO { hasPredicate "emit Replace(col.name,n)" },
+  hasBody B1, hasHead H1
+}
