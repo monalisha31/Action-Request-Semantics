@@ -51,19 +51,6 @@ plus three behavioural kinds (`OP`, `AO`, `AC`). The paper's `|R|` counts
 `AO` atoms) are excluded so that the extraction `[[·]]` of Lemma 1 yields a
 pure typed triple graph.
 
-## What this bundle is **not**
 
-- It is **not a general ART engine.** It is the runnable description of the
-  two ARTs in this paper. The body atoms of `L_g` are realised as Cypher
-  `MATCH` queries; the head atoms are realised as `CREATE` statements. A
-  general ART tool that compiles arbitrary HUTN ARTs to Cypher is future
-  work.
-- It is **not a performance benchmark.** The numbers are a reproducibility
-  witness, not a scalability claim (see Evaluation, Sec. 6 of the paper).
 
-## Citation / link
 
-If you reuse the artefact, please cite the paper. The repository for this
-bundle is at:
-
-> https://github.com/monalisha31/Action-Request-Semantics
